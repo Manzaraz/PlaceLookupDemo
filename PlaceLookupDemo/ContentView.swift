@@ -6,19 +6,40 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct ContentView: View {
+    @EnvironmentObject var locationManager: LocationManager
+    @State private var showPlaceLookupStreet = false
+    @State var returnedPlace = Place(mapItem: MKMapItem())
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            VStack (alignment: .leading) {
+                Text("Location:\n\(locationManager.location?.coordinate.latitude ?? 0.0), \(locationManager.location?.coordinate.longitude ?? 0.0)")
+                    .padding(.bottom)
+                
+                Text("Returned Place: \nName: \(returnedPlace.name)\n\(returnedPlace.address)\nCoords: \(returnedPlace.latitude), \(returnedPlace.longitude)")
+            }
+            .padding()
+            .toolbar {
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        showPlaceLookupStreet.toggle()
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                        Text("Lookup Place")
+                    }
+                }
+            }
         }
-        .padding()
+        .fullScreenCover(isPresented: $showPlaceLookupStreet) {
+            PlaceLookupView(returnedPlace: $returnedPlace)
+        }
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView() // Location doesn't show in Live Preview - use Simulator
+        .environmentObject(LocationManager())
 }
